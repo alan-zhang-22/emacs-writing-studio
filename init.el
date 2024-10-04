@@ -35,6 +35,8 @@
 (when (< emacs-major-version 29)
   (error "Emacs Writing Studio requires Emacs version 29 or later"))
 
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+
 ;; Custom settings in a separate file and load the custom settings
 
 (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -745,3 +747,12 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((dot . t))) ; this line activates GraophViz dot
+
+;; magit
+(use-package magit)
+
+;; eglot
+(use-package eglot
+  :ensure)
+
+(require 'init-ess)
