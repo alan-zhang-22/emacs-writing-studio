@@ -4,7 +4,8 @@
 
 ;; Author: Peter Prevos <peter@prevos.net>
 ;; Maintainer: Peter Prevos <peter@prevos.net>
-
+;; URL: https://github.com/pprevos/emacs-writing-studio/
+;;
 ;; This file is NOT part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -30,7 +31,7 @@
 ;;
 ;;; Code:
 
-;; Emacs 29? EWS leverages functionality from the latest Emacs version.
+;; Emacs 29?
 
 (when (< emacs-major-version 29)
   (error "Emacs Writing Studio requires Emacs version 29 or later"))
@@ -41,10 +42,9 @@
 
 (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
 
-(when (file-exists-p custom-file)
-  (load custom-file))
+(load custom-file :no-error-if-file-is-missing)
 
-(keymap-global-set "C-c w v" 'customise-variable)
+(keymap-global-set "C-c w v" 'customize-variable)
 
 ;; Set package archives
 
@@ -73,8 +73,7 @@
 ;; - pdftotext (poppler-utils): Convert PDF to text
 ;; - ddjvu (DjVuLibre): View DjVu files
 ;; - curl: Reading RSS feeds
-;; - convert (ImageMagick) or gm (GraphicsMagick): Convert image files 
-;; - latex (TexLive, MacTex or MikTeX): Preview LaTex and export Org to PDF
+;; - convert (ImageMagick) or gm (GraphicsMagick): Convert image files  ;; - latex (TexLive, MacTex or MikTeX): Preview LaTex and export Org to PDF
 ;; - hunspell: Spellcheck. Also requires a hunspell dictionary
 ;; - grep: Search inside files
 ;; - gs (GhostScript) or mutool (MuPDF): View PDF files
@@ -103,37 +102,35 @@
 
 ;; Short answers only please
 
-(setq use-short-answers t)
+(setq-default use-short-answers t)
 
 ;; Spacious padding
 
 (use-package spacious-padding
   :custom
   (line-spacing 3)
-  :init
   (spacious-padding-mode 1))
 
-;; Modus Themes
+;; Modus and EF Themes
 
 (use-package modus-themes
   :custom
   (modus-themes-italic-constructs t)
   (modus-themes-bold-constructs t)
   (modus-themes-mixed-fonts t)
-  (modus-themes-to-toggle
-   '(modus-operandi-tinted modus-vivendi-tinted))
-  :init
-  (load-theme 'modus-operandi-tinted :no-confirm)
+  (modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted))
   :bind
   (("C-c w t t" . modus-themes-toggle)
    ("C-c w t m" . modus-themes-select)
    ("C-c w t s" . consult-theme)))
 
+(use-package ef-themes)
+
 ;; Mixed-pich mode
 
 (use-package mixed-pitch
   :hook
-  (text-mode . mixed-pitch-mode))
+  (org-mode . mixed-pitch-mode))
 
 ;; Window management
 ;; Split windows sensibly
@@ -187,6 +184,9 @@
   (which-key-max-description-length 40)
   (which-key-lighter nil)
   (which-key-sort-order 'which-key-description-order))
+
+(when (display-graphic-p)
+  (context-menu-mode))
 
 ;; Improved help buffers
 
@@ -280,13 +280,6 @@
   (org-modern-radio-target nil)
   (org-modern-statistics nil)
   (org-modern-progress nil))
-
-;; Consult convenience functions
-
-(use-package consult
-  :bind
-  (("C-c w h" . consult-org-heading)
-   ("C-c w g" . consult-grep)))
 
 ;; INSPIRATION
 
@@ -423,6 +416,7 @@
   :defer t
   :custom
   (denote-sort-keywords t)
+  (denote-link-description-function #'ews-denote-link-description-title-case)
   :hook
   (dired-mode . denote-dired-mode)
   :custom-face
@@ -432,20 +426,26 @@
   :bind
   (("C-c w d b" . denote-find-backlink)
    ("C-c w d d" . denote-date)
-   ("C-c w d f" . denote-find-link)
+   ("C-c w d l" . denote-find-link)
    ("C-c w d h" . denote-org-extras-link-to-heading)
    ("C-c w d i" . denote-link-or-create)
    ("C-c w d k" . denote-rename-file-keywords)
-   ("C-c w d l" . denote-insert-link)
    ("C-c w d n" . denote)
    ("C-c w d r" . denote-rename-file)
    ("C-c w d R" . denote-rename-file-using-front-matter)))
+
+;; Consult convenience functions
+
+(use-package consult
+  :bind
+  (("C-c w h" . consult-org-heading)
+   ("C-c w g" . consult-grep)))
 
 ;; Consult-Notes for easy access to notes
 
 (use-package consult-notes
   :bind
-  (("C-c w f"   . consult-notes)
+  (("C-c w d f" . consult-notes)
    ("C-c w d g" . consult-notes-search-in-all-notes))
   :init
   (consult-notes-denote-mode))
@@ -552,8 +552,6 @@
 ;; Titlecasing
 
 (use-package titlecase
-  :custom
-  (titlecase-style 'apa)
   :bind
   (("C-c w s t" . titlecase-dwim)
    ("C-c w s c" . ews-org-headings-titlecase)))
@@ -582,9 +580,17 @@
   (ediff-split-window-function 'split-window-horizontally)
   (ediff-window-setup-function 'ediff-setup-windows-plain))
 
+;; Enable Other text modes
+
+;; Fontain mode for writing scrits
+
 (use-package fountain-mode)
 
+;; Markdown mode
+
 (use-package markdown-mode)
+
+;; PUBLICATION
 
 ;; Generic Org Export Settings
 
@@ -592,7 +598,6 @@
   :custom
   (org-export-with-drawers nil)
   (org-export-with-todo-keywords nil)
-  (org-export-with-broken-links t)
   (org-export-with-toc nil)
   (org-export-with-smart-quotes t)
   (org-export-date-timestamp-format "%e %B %Y"))
@@ -629,7 +634,7 @@
   (add-to-list
    'org-latex-classes
    '("ews"
-     "\\documentclass[11pt, twoside]{memoir}
+     "\\documentclass[11pt, twoside, hidelinks]{memoir}
       \\setstocksize{9.25in}{7.5in}
       \\settrimmedsize{\\stockheight}{\\stockwidth}{*}
       \\setlrmarginsandblock{2cm}{1cm}{*} 
@@ -643,6 +648,8 @@
       \\setsecheadstyle{\\normalfont \\raggedright \\textbf}
       \\setsubsecheadstyle{\\normalfont \\raggedright \\textbf}
       \\setsubsubsecheadstyle{\\normalfont\\centering}
+      \\renewcommand\\texttt[1]{{\\normalfont\\fontfamily{cmvtt}
+        \\selectfont #1}}
       \\usepackage[font={small, it}]{caption}
       \\pagestyle{myheadings}
       \\usepackage{ccicons}
@@ -685,7 +692,7 @@
   :init
   (put 'dired-find-alternate-file 'disabled nil))
 
-;; Hide hidden files
+;; Hide or display hidden files
 
 (use-package dired
   :ensure nil
