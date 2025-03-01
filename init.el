@@ -590,6 +590,9 @@
 
 (use-package markdown-mode)
 
+;; markdown-command
+(setq markdown-command "pandoc")
+
 ;; PUBLICATION
 
 ;; Generic Org Export Settings
@@ -761,5 +764,14 @@
 ;; eglot
 (use-package eglot
   :ensure)
+
+;; exec-path-from-shell
+(use-package exec-path-from-shell
+  :ensure)
+
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+(when (daemonp)
+  (exec-path-from-shell-initialize))
 
 (require 'init-ess)
