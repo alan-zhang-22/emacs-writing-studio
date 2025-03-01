@@ -591,7 +591,10 @@
 (use-package markdown-mode)
 
 ;; markdown-command
-(setq markdown-command "pandoc")
+(setq markdown-command
+      (concat "pandoc"
+	      " --from=markdown --to=html"
+	      " --standalone --citeproc --mathjax"))
 
 ;; PUBLICATION
 
