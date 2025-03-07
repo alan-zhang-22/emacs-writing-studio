@@ -602,48 +602,15 @@
 )
 
 ;; markdown-command
-;; (defvar my-mermaid-filter-path "./mermaid_filter.py")
-;; (setq markdown-command
-;;      (concat "pandoc"
-;;	      " --from=markdown --to=html"
-;;	      " --number-sections"
-;;	      " --standalone --citeproc --mathjax"
-;;	      " --filter=" (expand-file-name my-mermaid-filter-path)
-;;	      " "))
+ (defvar my-mermaid-filter-path "/Users/alan/ITI.DeIdHandbook/input/pandoc_filters/mermaid_filter.py")
+ (setq markdown-command
+      (concat "pandoc"
+	      " --from=markdown --to=html"
+	      " --standalone --citeproc --mathjax"
+	      " --filter=" (expand-file-name my-mermaid-filter-path)
+	      " "))
 
-(defun my/markdown-pandoc-command (&rest _args)
-  "Generate Pandoc command dynamically based on current file path."
-  (save-buffer) ; 确保文件保存
-  (let* ((input-file (buffer-file-name))
-         (output-file (concat (file-name-sans-extension input-file) ".html"))
-         (filter-dir (expand-file-name "../pandoc_filters" (file-name-directory input-file)))
-         (filter-path (expand-file-name "mermaid_filter.py" filter-dir)))
-    (message "Debug: Input file: %s" input-file)
-    (message "Debug: Output file: %s" output-file)
-    (message "Debug: Filter path: %s" filter-path)
-    (message "Debug: Filter exists: %s" (file-exists-p filter-path))
-    (message "Debug: Filter executable: %s" (file-executable-p filter-path))
-    (if (and input-file (file-exists-p input-file))
-        (let ((command (concat "pandoc -s -f markdown+fenced_code_blocks+fenced_code_attributes "
-                               input-file
-                               " -o " output-file
-                               " --citeproc --mathjax"
-                               " --filter=" filter-path
-                               " --number-sections")))
-          (message "Debug: Running command: %s" command)
-          (let ((output (shell-command-to-string command)))
-            (message "Debug: Command output: %s" output))
-          command)
-      (error "No file associated with this buffer"))))
 
-;; 设置 markdown-command 为动态函数
-(setq markdown-command 'my/markdown-pandoc-command)
-
-;; 绑定快捷键
-(add-hook 'markdown-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-c C-e") 'markdown-export)
-            (local-set-key (kbd "C-c C-p") 'markdown-open)))
 
 ;; 确保 exec-path 包含 Pandoc 和 mmdc
 (add-to-list 'exec-path "/opt/local/bin") ; 替换为 Pandoc 和 mmdc 的实际路径
